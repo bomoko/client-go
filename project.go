@@ -217,7 +217,7 @@ func (ps ProjectService) GetChildren(ctx context.Context, projectUUID uuid.UUID,
 		"uuid": projectUUID.String(),
 	}
 
-	req, err := ps.client.newRequest(ctx, http.MethodGet, "/api/v1/project/{uuid}/children", withPathParams(pathParams), withPageOptions(po))
+	req, err := ps.client.newRequest(ctx, http.MethodGet, "api/v1/project/{uuid}/children", withPathParams(pathParams), withPageOptions(po))
 	if err != nil {
 		return
 	}
