@@ -36,12 +36,15 @@ type Client struct {
 	about      About
 
 	About             AboutService
+	ACL               ACLService
 	Analysis          AnalysisService
 	BOM               BOMService
 	Component         ComponentService
 	Config            ConfigService
-	Finding           FindingService
 	Event             EventService
+	Finding           FindingService
+	Health            HealthService
+	LDAP              LDAPService
 	License           LicenseService
 	Metrics           MetricsService
 	OIDC              OIDCService
@@ -52,6 +55,7 @@ type Client struct {
 	Project           ProjectService
 	ProjectProperty   ProjectPropertyService
 	Repository        RepositoryService
+	Tag               TagService
 	Team              TeamService
 	User              UserService
 	VEX               VEXService
@@ -85,12 +89,15 @@ func NewClient(baseURL string, options ...ClientOption) (*Client, error) {
 	}
 
 	client.About = AboutService{client: &client}
+	client.ACL = ACLService{client: &client}
 	client.Analysis = AnalysisService{client: &client}
 	client.BOM = BOMService{client: &client}
 	client.Component = ComponentService{client: &client}
 	client.Config = ConfigService{client: &client}
-	client.Finding = FindingService{client: &client}
 	client.Event = EventService{client: &client}
+	client.Finding = FindingService{client: &client}
+	client.Health = HealthService{client: &client}
+	client.LDAP = LDAPService{client: &client}
 	client.License = LicenseService{client: &client}
 	client.Metrics = MetricsService{client: &client}
 	client.OIDC = OIDCService{client: &client}
@@ -101,6 +108,7 @@ func NewClient(baseURL string, options ...ClientOption) (*Client, error) {
 	client.Project = ProjectService{client: &client}
 	client.ProjectProperty = ProjectPropertyService{client: &client}
 	client.Repository = RepositoryService{client: &client}
+	client.Tag = TagService{client: &client}
 	client.Team = TeamService{client: &client}
 	client.User = UserService{client: &client}
 	client.VEX = VEXService{client: &client}
@@ -187,7 +195,7 @@ func withPathParams(params map[string]string) requestOption {
 		}
 
 		for k, v := range params {
-			req.URL.Path = strings.Replace(req.URL.Path, fmt.Sprintf("{%s}", k), v, -1)
+			req.URL.Path = strings.ReplaceAll(req.URL.Path, fmt.Sprintf("{%s}", k), v)
 		}
 		return nil
 	}
@@ -279,6 +287,27 @@ func withPageOptions(po PageOptions) requestOption {
 
 		if po.PageSize > 0 {
 			query.Set("pageSize", strconv.Itoa(po.PageSize))
+		}
+
+		req.URL.RawQuery = query.Encode()
+
+		return nil
+	}
+}
+
+type SortOptions struct {
+	Name  string `json:"sortName"`
+	Order string `json:"sortOrder"`
+}
+
+func withSortOptions(so SortOptions) requestOption {
+	return func(req *http.Request) error {
+		query := req.URL.Query()
+		if len(so.Name) > 0 {
+			query.Set("sortName", so.Name)
+		}
+		if len(so.Order) > 0 {
+			query.Set("sortOrder", so.Order)
 		}
 
 		req.URL.RawQuery = query.Encode()

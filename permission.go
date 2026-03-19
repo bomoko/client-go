@@ -35,7 +35,7 @@ type Permission struct {
 }
 
 func (ps PermissionService) GetAll(ctx context.Context, po PageOptions) (p Page[Permission], err error) {
-	req, err := ps.client.newRequest(ctx, http.MethodGet, "/api/v1/permission", withPageOptions(po))
+	req, err := ps.client.newRequest(ctx, http.MethodGet, "api/v1/permission", withPageOptions(po))
 	if err != nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (ps PermissionService) GetAll(ctx context.Context, po PageOptions) (p Page[
 }
 
 func (ps PermissionService) AddPermissionToTeam(ctx context.Context, permission Permission, team uuid.UUID) (t Team, err error) {
-	req, err := ps.client.newRequest(ctx, http.MethodPost, fmt.Sprintf("/api/v1/permission/%s/team/%s", permission.Name, team.String()))
+	req, err := ps.client.newRequest(ctx, http.MethodPost, fmt.Sprintf("api/v1/permission/%s/team/%s", permission.Name, team.String()))
 	if err != nil {
 		return
 	}
@@ -59,11 +59,31 @@ func (ps PermissionService) AddPermissionToTeam(ctx context.Context, permission 
 	return
 }
 func (ps PermissionService) RemovePermissionFromTeam(ctx context.Context, permission Permission, team uuid.UUID) (t Team, err error) {
-	req, err := ps.client.newRequest(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/permission/%s/team/%s", permission.Name, team.String()))
+	req, err := ps.client.newRequest(ctx, http.MethodDelete, fmt.Sprintf("api/v1/permission/%s/team/%s", permission.Name, team.String()))
 	if err != nil {
 		return
 	}
 
 	_, err = ps.client.doRequest(req, &t)
+	return
+}
+
+func (ps PermissionService) AddPermissionToUser(ctx context.Context, permission Permission, username string) (user UserPrincipal, err error) {
+	req, err := ps.client.newRequest(ctx, http.MethodPost, fmt.Sprintf("api/v1/permission/%s/user/%s", permission.Name, username))
+	if err != nil {
+		return
+	}
+
+	_, err = ps.client.doRequest(req, &user)
+	return
+}
+
+func (ps PermissionService) RemovePermissionFromUser(ctx context.Context, permission Permission, username string) (user UserPrincipal, err error) {
+	req, err := ps.client.newRequest(ctx, http.MethodDelete, fmt.Sprintf("api/v1/permission/%s/user/%s", permission.Name, username))
+	if err != nil {
+		return
+	}
+
+	_, err = ps.client.doRequest(req, &user)
 	return
 }
